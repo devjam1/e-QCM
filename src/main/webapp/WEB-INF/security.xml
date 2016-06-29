@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <global-method-security pre-post-annotations="enabled"/>
+
+    <http use-expressions="true">
+        <intercept-url pattern="/users**" access="hasRole('ROLE_ADMIN')"/>
+        <intercept-url pattern="/users/**" access="hasRole('ROLE_ADMIN')"/>
+
+        <!--Why?-->
+        <intercept-url pattern="/account**" access="hasRole('ROLE_ETUDIANT')"/>
+
+        <form-login login-page="/connexion.html"/>
+        <logout logout-url="/logout"/>
+    </http>
+
+    <authentication-manager>
+        <authentication-provider>
+            <password-encoder hash="bcrypt"/>
+            <jdbc-user-service data-source-ref="dataSource"
+                               authorities-by-username-query="select utilisateur.login, role.nomRole from utilisateur
+											   join utilisateur_role on utilisateur.id = utilisateur_role.utilisateurs_id
+											   join role on utilisateur_role.roles_id = role.id
+											   where utilisateur.login = ?"
+                               users-by-username-query="select login ,mdp,enabled from utilisateur where login = ?"/>
+        </authentication-provider>
+    </authentication-manager>
+
+</beans:beans>
